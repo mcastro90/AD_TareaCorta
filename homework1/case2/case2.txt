@@ -1,0 +1,73 @@
+En este escenario, del caso 2, no se encontraron posibles casos de memory leaks
+a como lo expresa el programa:
+
+==8987== 
+==8987== HEAP SUMMARY:
+==8987==     in use at exit: 0 bytes in 0 blocks
+==8987==   total heap usage: 1 allocs, 1 frees, 1,024 bytes allocated
+==8987== 
+==8987== All heap blocks were freed -- no leaks are possible
+
+Sin embargo, se detectaron unos problemas al ejecutar el binario:
+
+==8987== Conditional jump or move depends on uninitialised value(s)
+==8987==    at 0x48BF029: vfprintf (vfprintf.c:1637)
+==8987==    by 0x48C6605: printf (printf.c:33)
+==8987==    by 0x109197: main (case2.c:11)
+==8987== 
+==8987== Use of uninitialised value of size 8
+==8987==    at 0x48BAD1E: _itoa_word (_itoa.c:179)
+==8987==    by 0x48BE5F3: vfprintf (vfprintf.c:1637)
+==8987==    by 0x48C6605: printf (printf.c:33)
+==8987==    by 0x109197: main (case2.c:11)
+==8987== 
+==8987== Conditional jump or move depends on uninitialised value(s)
+==8987==    at 0x48BAD29: _itoa_word (_itoa.c:179)
+==8987==    by 0x48BE5F3: vfprintf (vfprintf.c:1637)
+==8987==    by 0x48C6605: printf (printf.c:33)
+==8987==    by 0x109197: main (case2.c:11)
+==8987== 
+==8987== Conditional jump or move depends on uninitialised value(s)
+==8987==    at 0x48BF213: vfprintf (vfprintf.c:1637)
+==8987==    by 0x48C6605: printf (printf.c:33)
+==8987==    by 0x109197: main (case2.c:11)
+==8987== 
+==8987== Conditional jump or move depends on uninitialised value(s)
+==8987==    at 0x48BE75D: vfprintf (vfprintf.c:1637)
+==8987==    by 0x48C6605: printf (printf.c:33)
+==8987==    by 0x109197: main (case2.c:11)
+
+Analizando el código fuente del binario:
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv){
+  int i;
+  int a[10];
+  for (i = 0; i < 9; i++)
+    a[i] = i;
+    
+  for (i = 0; i < 10; i++){
+    printf("%d ", a[i]);
+  }
+  printf("\n");
+  return 0;
+}
+
+Se tienen las siguientes conclusiones:
+
+Se tiene un arreglo de "int"s de tamaño 10, por lo que se pueden acceder a las
+posiciones desde el 0 al 9. En el primer "for" se está inicializando
+9 posiciones del arreglo, la última posición del mismo se está dejando con el
+  valor que cuenta la memoria en ese momento al realizar el "malloc" (valor
+previo o basura).
+
+Los errores que se presentan son dado que el valor que se encuentra en la
+posición 10 del arreglo (9 si se empieza de 0), se encuentra en un estado sin
+inicializar por lo que el valor como tal puede ser algo que vaya a generar
+problemas a la hora de llamar a la función de printf, más que se tiene que
+hacer la conversión del tipo "%d" y este valor puede generar problemas.
+
+El problema se resuelve modificando el límite del primer "for" para que en
+lugar de procesar 9 elementos, inicialice 10. Cambiando el valor a 10.

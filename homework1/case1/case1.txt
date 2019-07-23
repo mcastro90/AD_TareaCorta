@@ -1,0 +1,47 @@
+En este caso en particular, no se presentan resultados de memory leaks.
+
+==8942== HEAP SUMMARY:
+==8942==     in use at exit: 0 bytes in 0 blocks
+==8942==   total heap usage: 1 allocs, 1 frees, 40 bytes allocated
+
+Como lo menciona Valgrind, se hizo un 1 alloc, 1 free y se liberaron 40 bytes
+que se solicitaron.
+
+
+Código fuente:
+int *a = malloc(sizeof(int) * 10);
+
+Errores encontrados:
+
+==8942== Invalid write of size 4
+==8942==    at 0x109190: main (case1.c:9)
+==8942==  Address 0x4a32068 is 0 bytes after a block of size 40 alloc'd
+==8942==    at 0x483577F: malloc (vg_replace_malloc.c:299)
+==8942==    by 0x10915D: main (case1.c:6)
+
+En este caso se está mencionando una escritura inválida de tamaño 4 (osea un
+int), dentro del código fuente se puede encontrar el siguiente caso:
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv){
+  int i;
+  int *a = malloc(sizeof(int) * 10);
+  if (!a) return -1; /*malloc failed*/
+  for (i = 0; i < 11; i++){
+    a[i] = i;
+  }
+  free(a);
+  return 0;
+}
+
+Se tiene un tamaño de arreglo solicitado de 10 números de tipo "int". Por lo
+que las posiciones del arreglo como tal se pueden acceder desde el 0 al 9. El
+problema radica en el condicional del "for" que está mencionando que el número
+máximo es 11, por lo que el proceso se va a repetir desde el 0 hasta el 10
+y esa última posición se sale por completo de la memoria que se solicitó en el
+"malloc" y se están sobreescribiendo en otras direcciones de memoria.
+
+Para resolver este problema es necesario cambiar el índice que está dentro del
+"for" y ajustarlo al tamaño solicitado de memoria dentro del "malloc".
