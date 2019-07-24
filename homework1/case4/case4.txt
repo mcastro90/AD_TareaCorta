@@ -1,0 +1,23 @@
+Para el análisis del case4, se tiene la siguiente información desplegada:
+
+==22862== HEAP SUMMARY:
+==22862==     in use at exit: 1,040 bytes in 65 blocks
+==22862==   total heap usage: 96 allocs, 31 frees, 11,776 bytes allocated
+==22862== 
+==22862== LEAK SUMMARY:
+==22862==    definitely lost: 16 bytes in 1 blocks
+==22862==    indirectly lost: 1,024 bytes in 64 blocks
+==22862==      possibly lost: 0 bytes in 0 blocks
+==22862==    still reachable: 0 bytes in 0 blocks
+==22862==         suppressed: 0 bytes in 0 blocks
+
+En este caso se presentan datos sobre un leak de memoria. En el resumen del
+leak se pueden determinar ciertos valores a considerar:
+
+"definitely lost": Es memoria que se perdió que no fue liberada, seguramente un
+puntero cambió de valor y la dirección de memoria se perdió y no puede ser
+liberada.
+
+"indirectly lost": Punteros hijos que se perdieron al haber perdido punteros de
+niveles superiores o el puntero padre dependiendo de la estructura de datos que
+se haya utilizado.
