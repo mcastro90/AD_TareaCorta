@@ -1,0 +1,57 @@
+En este escenario, del caso 3, se encontraron posibles casos de memory leaks
+a como lo expresa el programa:
+
+==9069== Memcheck, a memory error detector
+==9069== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==9069== Using Valgrind-3.14.0 and LibVEX; rerun with -h for copyright info
+==9069== Command: ./case3
+==9069== 
+==9069== 
+==9069== HEAP SUMMARY:
+==9069==     in use at exit: 3,600 bytes in 9 blocks
+==9069==   total heap usage: 10 allocs, 1 frees, 4,000 bytes allocated
+==9069== 
+==9069== LEAK SUMMARY:
+==9069==    definitely lost: 3,600 bytes in 9 blocks
+==9069==    indirectly lost: 0 bytes in 0 blocks
+==9069==      possibly lost: 0 bytes in 0 blocks
+==9069==    still reachable: 0 bytes in 0 blocks
+==9069==         suppressed: 0 bytes in 0 blocks
+==9069== Rerun with --leak-check=full to see details of leaked memory
+==9069== 
+==9069== For counts of detected and suppressed errors, rerun with: -v
+==9069== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+El problema a como se describe en el mensaje, se realizaron 10 "mallocs" de los
+que únicamente se liberó 1 vez utilizando un "free".
+
+Analizando el código fuente tenemos:
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(int argc, char** argv){
+  int i;
+  int *a;
+
+  for (i=0; i < 10; i++){
+    a = malloc(sizeof(int) * 100);
+  }
+  free(a);
+  return 0;
+}
+
+Se tiene un único puntero que se le va a realizar 10 veces un "malloc" de
+tamaño 400 bytes cada iteración. El problema radica en que el puntero se
+sobreescribe cada iteración por lo que la memoria que estaba previamente
+utilizada se va a perder.
+
+El free únicamente va a liberar lo que tenga el puntero apuntando después de la
+útlima iteración del ciclo. No hay forma de poder liberar la memoria
+previamente solicitada dado que no está guardada en ninguna variable.
+
+Si lo que se quiere es corregir el error, se debería de utilizar un arreglo
+donde se almacenen 10 punteros de tipo "int" donde se va a colocar una
+dirección de memoria después de utilizar el "malloc". Y al final se debería de
+volver a utilizar el arreglo para iterar sobre cada posición y aplicar un
+"free" a la dirección almacenada.
