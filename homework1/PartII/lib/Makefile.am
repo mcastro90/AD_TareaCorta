@@ -4,5 +4,5 @@ AM_LDFLAGS =-ldl
 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile
-noinst_LTLIBRARIES = libmemcheck.la
+lib_LTLIBRARIES = libmemcheck.la
 libmemcheck_la_SOURCES = libmemcheck.c
