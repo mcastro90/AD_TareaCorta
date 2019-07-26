@@ -9,6 +9,8 @@ void print_usage();
 void print_authors();
 int process_program(char *program, char *argv[]);
 
+char *environ = "LD_PRELOAD=./build/lib/libmemcheck.so\0";
+
 int main(int argc, char *argv[])
 {
     int opt= 0;
@@ -22,7 +24,7 @@ int main(int argc, char *argv[])
         {0,           0,                 0,   0  }
     };
 
-    opt = getopt_long(argc, argv,":ahp:", long_options, &long_index);
+    opt = getopt_long(argc, argv,"ahp:", long_options, &long_index);
 
     switch (opt) {
         case 'a' :
@@ -75,7 +77,7 @@ int process_program(char *program, char *argv[])
 
     if (process == 0) {
         argv[0] = program;
-        execv(argv[0], argv);
+        execve(argv[0], argv, &environ);
         return 2;
     }
 
