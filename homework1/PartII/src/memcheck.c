@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     }
 
     if (program) {
-        printf("Program stored: %s\n", program);
+        return process_program(program, argv);
     }
     return 0;
 }
@@ -60,4 +60,29 @@ void print_authors() {
 "ITCR - Maestría en Electrónica, II Cuatrimestre 2019\n"
 "High Performance Embedded Systems\n"
 "Mario Castro\nÓscar Dengo\nAlejandro Rodríguez\n");
+}
+
+int process_program(char *program, char *argv[])
+{
+    pid_t process;
+
+    process = fork();
+
+    if (process < 0) {
+        perror("fork");
+        return 2;
+    }
+
+    if (process == 0) {
+        argv[0] = program;
+        execv(argv[0], argv);
+        return 2;
+    }
+
+    int status;
+    pid_t wait_result;
+
+    while ((wait_result = wait(&status)) != -1);
+
+    return 0;
 }
