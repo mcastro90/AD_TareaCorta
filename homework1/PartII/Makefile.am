@@ -2,3 +2,4 @@
 # automake that this is a foreign project
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = lib src
+ACLOCAL_AMFLAGS = -I m4
