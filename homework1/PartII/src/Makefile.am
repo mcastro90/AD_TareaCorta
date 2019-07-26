@@ -6,3 +6,4 @@ AM_LDFLAGS=
 # the previous manual Makefile
 bin_PROGRAMS = memcheck
 memcheck_SOURCES = memcheck.c
+memcheck_LDADD = ../lib/libmemcheck.la
