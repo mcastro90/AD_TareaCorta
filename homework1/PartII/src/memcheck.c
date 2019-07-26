@@ -2,14 +2,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <errno.h>
+#include <sys/wait.h>
 
 void print_usage();
 void print_authors();
+int process_program(char *program, char *argv[]);
 
 int main(int argc, char *argv[])
 {
     int opt= 0;
-    int area = -1, perimeter = -1, breadth = -1, length =-1;
+    int long_index =0;
     char *program;
 
     static struct option long_options[] = {
@@ -19,27 +22,21 @@ int main(int argc, char *argv[])
         {0,           0,                 0,   0  }
     };
 
-    if (argc < 2) {
-        print_usage();
-        return -1;
-    }
+    opt = getopt_long(argc, argv,":ahp:", long_options, &long_index);
 
-    int long_index =0;
-    while ((opt = getopt_long(argc, argv,"ahp:", long_options, &long_index))
-            != -1) {
-        switch (opt) {
-             case 'a' :
-                 print_authors();
-                 break;
-             case 'h' :
-                 print_usage();
-                 break;
-             case 'p' :
-                 program = optarg;
-                 break;
-             default: print_usage();
-                 exit(EXIT_FAILURE);
-        }
+    switch (opt) {
+        case 'a' :
+             print_authors();
+             break;
+        case 'h' :
+             print_usage();
+             break;
+        case 'p' :
+             program = optarg;
+             break;
+        case '?':
+        default: print_usage();
+             exit(EXIT_FAILURE);
     }
 
     if (program) {
