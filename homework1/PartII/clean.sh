@@ -8,4 +8,4 @@ rm -rf aclocal.m4 autom4te.cache build-aux install-sh missing\
       Makefile.in src/Makefile src/Makefile.in \
       lib/libmemcheck.so src/memcheck src/memcheck.o \
       lib/libmemcheck.o src/.deps* lib/.deps* \
-      output build config.* libtool ltmain.sh m4
+      output build config.* libtool ltmain.sh m4 log.txt
