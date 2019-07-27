@@ -13,21 +13,21 @@ void (*free_real)(void*) = NULL;
 
 void __attribute__((constructor)) init_hooking()
 {
-	malloc_real = dlsym(RTLD_NEXT, "malloc");
-	free_real = dlsym(RTLD_NEXT, "free");
+    malloc_real = dlsym(RTLD_NEXT, "malloc");
+    free_real = dlsym(RTLD_NEXT, "free");
 }
 
 void __attribute__((destructor)) finish_hooking()
 {
-	printf("Analysis finished!\n");
-	printf("Memory allocations: %lld \n", mallocCallNum);
-	printf("Memory free: %lld \n", freeCallNum);
-	printf("Total memory leaks found: %lld \n", mallocCallNum - freeCallNum);
+    printf("Analysis finished!\n");
+    printf("Memory allocations: %lld \n", mallocCallNum);
+    printf("Memory free: %lld \n", freeCallNum);
+    printf("Total memory leaks found: %lld \n", mallocCallNum - freeCallNum);
 }
 
 void* malloc(size_t size)
 {
-	void* ret = malloc_real(size);
+    void* ret = malloc_real(size);
 
     if (ret) {
         ++mallocCallNum;
@@ -38,10 +38,10 @@ void* malloc(size_t size)
 
 void free(void *ptr)
 {
-	if (ptr == NULL) {
+    if (ptr == NULL) {
         return;
     }
 
-	free_real(ptr);
+    free_real(ptr);
     ++freeCallNum;
 }
